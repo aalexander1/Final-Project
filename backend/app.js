@@ -15,7 +15,7 @@ var connection = mysql.createConnection({
 
 connection.connect();
 
-/* GET products listing. */
+// === GET all available products ===
 router.get('/products', function(req, res) {
     connection.query(`SELECT * FROM Products`, function (error, results, fields) {
         if (error) throw error;
@@ -25,16 +25,53 @@ router.get('/products', function(req, res) {
     });
 });
 
-router.post('/', function(req, res) {
+
+// === GET specific Order ===
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+router.post('/submitOrder', function(req, res) {
+
+    let insertQuery = `INSERT INTO Orders (OrderStatus)
+    VALUES ('Pending')`;
+
+    let productsQuery = `INSERT INTO Orders_Products (OrderID, ProductID)
+    VALUES `;
+
     let orders = req.body.orders;
-    connection.query('INSERT INTO Orders SET ?', {OrderStatus: 'pending'}, function (error, results, fields) {
+    console.log(orders);
+
+    connection.query(insertQuery, (error, results, fields) => {
+
         if (error) throw error;
-        orders.forEach( productID => {
-            connection.query('INSERT INTO Orders_Products SET ?', {OrderID: results.insertId, ProductID: productID}, function (error, results, fields) {
-                 if (error) throw error;
-            });
+        console.log(results.insertId)
+
+        orders.forEach((productID, key) => {
+            if (key != 0) {
+                productsQuery += `, `;
+            }
+
+            productsQuery += `(${results.insertId}, ${productID})`
         });
-        res.json({message: "Success"});
+
+        connection.query(productsQuery, function (error, results, fields) {
+            
+            res.json({message: "Success"});
+        });
     });
     // connection.query('SELECT * FROM `Products`', function (error, results, fields) {
     //     if (error) throw error;
@@ -45,14 +82,7 @@ router.post('/', function(req, res) {
 });
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.json('index', { title: 'Express' });
-});
 
-/* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.json('respond with a resource');
-});
 
 app.use(function(req, res, next) {
   res.header("access-Control-Allow-Origin", "*");

@@ -1,20 +1,31 @@
 import React, { Component } from 'react';
+import request from 'superagent';
 import './App.css';
 
 class App extends Component {
   constructor(props) {
     super(props);
+
     this.state = {
-      loading: true,
       products: [],
       orderProducts: []
     }
+
+    this.getAvailableProducts = this.getAvailableProducts.bind(this);
+
+    this.getAvailableProducts();
   }
 
-  componentDidMount() {
-    fetch('http://localhost:3001/products')
-      .then( r => r.json())
-      .then( r => this.setState({ products: r, loading: false}))
+  getAvailableProducts() {
+    request
+      .get('http://localhost:8080/products')
+      .then((res) => {
+
+        this.setState({
+          products: res.body
+        });
+
+      });
   }
 
   addToOrder = (productID) => {
@@ -24,22 +35,21 @@ class App extends Component {
   }
 
   submitOrder = () => {
-    fetch('http://localhost:3001/products', {
-      method: 'post',
-       headers: {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({orders: this.state.orderProducts})
-    }).then(function(response) {
-      return response.json();
-    }).then(function(data) {
-      alert(data.message);
-    });
+    request
+      .post('http://localhost:8080/submitOrder')
+      .send({
+        "orders": this.state.orderProducts
+      })
+      .then((res) => {
+
+        this.setState({
+          orderProducts: []
+        });
+
+      });
   }
 
   render() {
-    if (this.state.loading) return <h1>loading ......</h1>;
     return <div>
        <ul>
       {this.state.products.map( (p, key) => 
