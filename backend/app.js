@@ -15,75 +15,110 @@ var connection = mysql.createConnection({
 
 connection.connect();
 
-// === GET all available products ===
+// === GET All Available Products ===
 router.get('/products', function(req, res) {
     connection.query(`SELECT * FROM Products`, function (error, results, fields) {
         if (error) throw error;
 
         res.json(results);
-        //console.log('The solution is: ', results[0].solution);
     });
 });
 
 
-// === GET specific Order ===
+// === GET Specific Order ===
+router.get('/specificOrder/:order_id', function(req, res) {
+    connection.query(`SELECT OP.OrderID, P.* FROM Products P LEFT JOIN Orders_Products OP ON(P.ProductID = OP.ProductID) WHERE OP.OrderID = ${req.params.order_id}`, function (error, results, fields) {
+        //{req.params.id}
+        //Order ID used to test in Postman - 165
+        if (error) throw error;
+
+        res.json(results);
+    });
+});
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+// === POST Submit Order ===
 router.post('/submitOrder', function(req, res) {
 
     let insertQuery = `INSERT INTO Orders (OrderStatus)
     VALUES ('Pending')`;
 
-    let productsQuery = `INSERT INTO Orders_Products (OrderID, ProductID)
+    let insertProductsQuery = `INSERT INTO Orders_Products (OrderID, ProductID)
     VALUES `;
 
-    let orders = req.body.orders;
-    console.log(orders);
+    let products = req.body.products;
+    console.log(products);
 
     connection.query(insertQuery, (error, results, fields) => {
 
         if (error) throw error;
-        console.log(results.insertId)
+        console.log(results.insertId);
 
-        orders.forEach((productID, key) => {
+        products.forEach((productID, key) => {
             if (key != 0) {
-                productsQuery += `, `;
+                insertProductsQuery += `, `;
             }
 
-            productsQuery += `(${results.insertId}, ${productID})`
+            insertProductsQuery += `(${results.insertId}, ${productID})`
         });
 
-        connection.query(productsQuery, function (error, results, fields) {
+        connection.query(insertProductsQuery, function (error, results, fields) {
             
             res.json({message: "Success"});
         });
     });
-    // connection.query('SELECT * FROM `Products`', function (error, results, fields) {
-    //     if (error) throw error;
-
-    //     res.json(results);
-    //     //console.log('The solution is: ', results[0].solution);
-    // });
 });
 
-/* GET home page. */
+// === PUT Update Order ===
 
+router.put('/updateOrder/:order_id', function(req, res) {
 
+    let deleteProductsQuery = `DELETE FROM Orders_Products WHERE OrderID = ${req.params.order_id}`;
+
+    let insertNewProductsQuery = `INSERT INTO Orders_Products (OrderID, ProductID)
+    VALUES `;
+
+    let products = req.body.products;
+    console.log(products);
+
+    connection.query(deleteProductsQuery, (error, results, fields) => {
+        if (error) throw error;
+        
+        console.log(req.params.order_id);
+
+        products.forEach((productID, key) => {
+            if (key != 0) {
+                insertNewProductsQuery += `, `;
+            }
+
+            insertNewProductsQuery += `(${req.params.order_id}, ${productID})`
+        });
+
+        connection.query(insertNewProductsQuery, function (error, results, fields) {
+            
+            
+            res.json({message: "Order Updated"});
+        });
+    });
+
+});
+
+// === DELETE Delete Order ===
+router.delete('/orders/:order_id', function(req, res) {
+
+    let deleteQuery = `UPDATE Orders SET OrderStatus = 'Canceled' WHERE OrderID = ${req.params.order_id}`;
+//{req.params.id}
+//Order ID used to test in Postman - 156
+
+    connection.query(deleteQuery, (error, results, fields) => {
+
+        if (error) throw error;
+
+            res.json({message: "Order Canceled"});
+    });
+});
+
+// Solution to the CORS error
 app.use(function(req, res, next) {
   res.header("access-Control-Allow-Origin", "*");
   res.header("access-Control-Allow-Headers", "rigin, X-Requested-With, Content-Type, Accept");

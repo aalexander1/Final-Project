@@ -10,7 +10,7 @@ class App extends Component {
       products: [],
       orderProducts: []
     }
-
+// === GET all available products ===
     this.getAvailableProducts = this.getAvailableProducts.bind(this);
 
     this.getAvailableProducts();
@@ -28,6 +28,7 @@ class App extends Component {
       });
   }
 
+// === POST Submit Order ===
   addToOrder = (productID) => {
     let orders = this.state.orderProducts;
     orders.push(productID);
@@ -50,31 +51,28 @@ class App extends Component {
   }
 
   render() {
-    return <div>
+    return <div className="productListing">
+      
        <ul>
       {this.state.products.map( (p, key) => 
         <li key={key}>{p.ProductName} - Price {p.Price} - 
-          <button onClick={() => this.addToOrder(p.ProductID)}>Add to Orders</button>
+          <button onClick={() => this.addToOrder(p.ProductID)}>Add to Order</button>
         </li>
         )
       }
       </ul>
 
-      <button onClick={this.submitOrder}>Submit</button>
+      <button onClick={this.submitOrder}>Submit Order</button>
     </div>
 
-    // return (
-    //   <div className="App">
-    //     <header className="App-header">
-    //       <img src={logo} className="App-logo" alt="logo" />
-    //       <h1 className="App-title">Welcome to React</h1>
-    //     </header>
-    //     <p className="App-intro">
-    //       To get started, edit <code>src/App.js</code> and save to reload.
-    //     </p>
-    //   </div>
-    // );
   }
+
+// === GET Specific Order ===
+
+// === DELETE Delete Order ===
+
+
+
 }
 
 export default App;
